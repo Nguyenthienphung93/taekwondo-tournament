@@ -289,6 +289,13 @@ def load_event_json():
     return {'event_name': metadata.get('event',''), 'divisions': data.get('divisions', {})}
 
 
+# Favicon: reuse the same original NTP logo used in the portal header.
+# Browser requests to /favicon.ico are redirected to the existing logo endpoint.
+@app.get('/favicon.ico')
+def ntp_favicon():
+    return redirect('/portal-logo?v=20261118', code=302)
+
+
 @app.route("/icon/<path:filename>")
 def icon_files(filename):
     return send_from_directory(
@@ -801,6 +808,8 @@ INDEX_HTML = r"""
 <!doctype html>
 <html lang="vi">
 <head>
+<link rel="icon" type="image/png" sizes="any" href="/portal-logo?v=20261118" />
+<link rel="apple-touch-icon" href="/portal-logo?v=20261118" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ event_name }}</title>
@@ -7034,6 +7043,8 @@ function makePrintDocumentHtml(printTitle, contentHtml, printMode){
 <!doctype html>
 <html lang="vi">
 <head>
+<link rel="icon" type="image/png" sizes="any" href="/portal-logo?v=20261118" />
+<link rel="apple-touch-icon" href="/portal-logo?v=20261118" />
 <meta charset="utf-8">
 <title>${esc(printTitle)}</title>
 
@@ -8745,7 +8756,9 @@ def install_registration_routes(app, db_getter, year_getter, weights_getter=None
 
 
 REGISTRATION_HTML = r'''<!doctype html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="vi"><head>
+<link rel="icon" type="image/png" sizes="any" href="/portal-logo?v=20261118" />
+<link rel="apple-touch-icon" href="/portal-logo?v=20261118" /><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Registration Form — Taekwondo</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#07111f;color:#eef6ff;font-family:Arial,Helvetica,sans-serif}button,input,select{font:inherit}
@@ -9056,7 +9069,9 @@ def get_legacy_event_code():
     return os.environ.get('LEGACY_SIGMA_EVENT_CODE', 'TRE_TQ_2026').strip()
 
 PORTAL_HOME_HTML = r"""<!doctype html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="vi"><head>
+<link rel="icon" type="image/png" sizes="any" href="/portal-logo?v=20261118" />
+<link rel="apple-touch-icon" href="/portal-logo?v=20261118" /><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Taekwondo Competition Management System</title>
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:#07111f;color:#f2f8ff;font-family:Arial,Helvetica,sans-serif}
@@ -9568,7 +9583,9 @@ def event_admin_logout():
     return jsonify({'ok':True})
 
 
-ADMIN_EVENTS_HTML = r"""<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Event Admin | Phung TKD System</title><style>
+ADMIN_EVENTS_HTML = r"""<!doctype html><html lang="vi"><head>
+<link rel="icon" type="image/png" sizes="any" href="/portal-logo?v=20261118" />
+<link rel="apple-touch-icon" href="/portal-logo?v=20261118" /><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Event Admin | Phung TKD System</title><style>
 *{box-sizing:border-box}body{margin:0;background:#07111f;color:#f1f7ff;font-family:Arial,Helvetica,sans-serif}
 header{min-height:116px;background:linear-gradient(100deg,#03152d,#084b8a,#03152d);border-bottom:3px solid #ffd34d;padding:12px 22px;display:grid;grid-template-columns:140px 1fr 140px;align-items:center;gap:12px}
 .logo{max-width:106px;max-height:80px;background:#fff;padding:4px;border-radius:5px}.system-title{text-align:center;font-size:clamp(19px,2.5vw,32px);font-weight:900;color:#ffaa32;text-shadow:0 3px 3px #0008}.clock{padding:10px;border:2px solid #ffd34d;border-radius:12px;text-align:center;font-weight:800;background:#1a3353;font-size:15px}
