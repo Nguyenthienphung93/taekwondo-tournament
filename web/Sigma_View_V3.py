@@ -259,19 +259,41 @@ def load_sigma_divisions_from_supabase(event_code):
 
 from event_config import load_event
 
+
+def _load_legacy_event_optional():
+    """Optional legacy Setup/event.json; Supabase is the source for VPS events.
+
+    On a clean GitHub/VPS deployment, Setup/event.json may legitimately not
+    exist. An absent legacy file must not cause a public event page to 500.
+    Other errors (invalid JSON, permissions) should remain visible in logs.
+    """
+    try:
+        return load_event()
+    except RuntimeError as exc:
+        # event_config.load_event wraps FileNotFoundError in RuntimeError.
+        # Swallow ONLY that missing-file case, not corrupt JSON or permissions.
+        if isinstance(exc.__cause__, FileNotFoundError):
+            app.logger.info('Legacy Setup/event.json is absent; using Supabase event setup')
+            return {}
+        raise
+    except FileNotFoundError:
+        app.logger.info('Legacy Setup/event.json is absent; using Supabase event setup')
+        return {}
+
+
 def load_setup():
     # Event-scoped configuration from sigma_events.setup, with legacy fallback ONLY
     # for the original event. This fallback must not leak across events.
     row = load_active_sigma_event()
     if row:
         setup = row.get('setup') if isinstance(row.get('setup'), dict) else {}
-        legacy = load_event() if row.get('event_code') == get_legacy_event_code() else {}
+        legacy = _load_legacy_event_optional() if row.get('event_code') == get_legacy_event_code() else {}
         result = dict(legacy)
         result.update({k:v for k,v in setup.items() if v not in (None, '')})
         result['event'] = (setup.get('event') or setup.get('event_name')
                            or row.get('event_name') or result.get('event') or '')
         return result
-    return load_event()
+    return _load_legacy_event_optional()
 
 
 def load_event_json():
@@ -9248,7 +9270,7 @@ def _homepage():
         start_raw = s.get('date_from') or s.get('start_date') or ''
         end_raw = s.get('date_to') or s.get('end_date') or ''
         if not start_raw and row.get('event_code') == legacy_code:
-            legacy = load_event()
+            legacy = _load_legacy_event_optional()
             start_raw = legacy.get('date_from','')
             end_raw = legacy.get('date_to','')
             s = {**legacy, **s}
